@@ -1,0 +1,7 @@
+.git
+.idea
+.vscode
+vendor
+var
+phpunit.phar
+node_modules
