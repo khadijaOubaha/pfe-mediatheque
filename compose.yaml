@@ -26,7 +26,7 @@ services:
       APP_SECRET: secret-de-developpement
       DATABASE_URL: "mysql://app:app@database:3306/mediatheque?serverVersion=8.0&charset=utf8mb4"
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8000}:8000"
     depends_on:
       database:
         condition: service_healthy

@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ oeuvre.titre }}{% endblock %}
+
+{% block body %}
+    <p><a href="{{ path('app_catalogue') }}">← Retour au catalogue</a></p>
+    <h1>{{ oeuvre.titre }} <span class="badge">{{ oeuvre.type.value }}</span></h1>
+    {% if oeuvre.titreOriginal %}<p>Titre original : {{ oeuvre.titreOriginal }}</p>{% endif %}
+    {% if oeuvre.description %}<p>{{ oeuvre.description }}</p>{% endif %}
+
+    {% for edition in oeuvre.editions %}
+        <div class="carte">
+            <h2>
+                {{ edition.editeur ?: 'Éditeur inconnu' }}
+                {% if edition.anneePublication %}({{ edition.anneePublication }}){% endif %}
+            </h2>
+            <p>
+                {% if edition.isbn %}ISBN {{ edition.isbn }} · {% endif %}
+                Langue : {{ edition.langue }}
+                {% if edition.nbPages %} · {{ edition.nbPages }} pages{% endif %}
+            </p>
+
+            {% if edition.contributions|length > 0 %}
+                <p>
+                    {% for contribution in edition.contributions %}
+                        {{ contribution.personne }} <em>({{ contribution.role.value|lower }})</em>{{ loop.last ? '' : ' · ' }}
+                    {% endfor %}
+                </p>
+            {% endif %}
+
+            <h3>Disponibilité</h3>
+            {% set lignes = disponibilites[edition.id] ?? [] %}
+            {% if lignes|length > 0 %}
+                <table>
+                    <thead><tr><th>Site</th><th>Disponibles</th><th>En circulation</th></tr></thead>
+                    <tbody>
+                    {% for ligne in lignes %}
+                        <tr><td>{{ ligne.site }}</td><td>{{ ligne.disponibles }}</td><td>{{ ligne.total }}</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Aucun exemplaire en circulation.</p>
+            {% endif %}
+
+            {% if is_granted('ROLE_ADHERENT') %}
+                <form method="post" action="{{ path('app_reserver', {id: edition.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('reserver' ~ edition.id) }}">
+                    <label for="site-{{ edition.id }}">Site de retrait</label>
+                    <select id="site-{{ edition.id }}" name="site">
+                        {% for site in sites %}<option value="{{ site.id }}">{{ site.nom }}</option>{% endfor %}
+                    </select>
+                    <button type="submit">Réserver</button>
+                </form>
+            {% else %}
+                <p class="aide">Connectez-vous avec un compte adhérent pour réserver.</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endblock %}

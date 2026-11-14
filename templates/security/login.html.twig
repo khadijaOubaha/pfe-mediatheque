@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
+    <h1>Connexion</h1>
+
+    {% if erreur %}
+        <div class="alerte error">Identifiants incorrects.</div>
+    {% endif %}
+
+    <form method="post">
+        <label>Email
+            <input type="email" name="_username" value="{{ dernier_email }}" required autofocus autocomplete="username">
+        </label>
+        <label>Mot de passe
+            <input type="password" name="_password" required autocomplete="current-password">
+        </label>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <p class="aide">
+        <strong>Comptes de démonstration</strong><br>
+        Administrateur : admin@mediatheque.test / admin123<br>
+        Bibliothécaire : biblio@mediatheque.test / biblio123<br>
+        Adhérent : ahmed.benali1@example.com / adherent123
+    </p>
+{% endblock %}

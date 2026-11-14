@@ -1,23 +1,64 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
-
-        {% block javascripts %}
-        {% endblock %}
-
-        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphp_hot_reload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
-        {% endif %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Médiathèques{% endblock %} · Réseau de médiathèques</title>
+    <style>
+        :root { --bleu: #1f4e79; --gris: #f3f5f8; --bord: #d6dce5; --texte: #222; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--texte); background: #fff; line-height: 1.5; }
+        nav { display: flex; gap: 1rem; align-items: center; padding: .75rem 1.5rem; background: var(--bleu); color: #fff; flex-wrap: wrap; }
+        nav a { color: #fff; text-decoration: none; }
+        nav a:hover { text-decoration: underline; }
+        nav .marque { font-weight: 700; margin-right: 1rem; }
+        nav .espace { flex: 1; }
+        main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
+        h1 { margin-top: 0; color: var(--bleu); }
+        table { width: 100%; border-collapse: collapse; margin: .5rem 0 1.5rem; }
+        th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--bord); vertical-align: top; }
+        th { background: var(--gris); }
+        input, select, button { font: inherit; padding: .4rem .6rem; border: 1px solid var(--bord); border-radius: 6px; }
+        button { background: var(--bleu); color: #fff; border-color: var(--bleu); cursor: pointer; }
+        button.secondaire { background: #fff; color: var(--bleu); }
+        label { display: block; margin-bottom: .75rem; }
+        label input { display: block; width: 100%; max-width: 360px; }
+        .alerte { padding: .6rem .9rem; border-radius: 6px; margin-bottom: 1rem; }
+        .alerte.success { background: #e6f4ea; border: 1px solid #b7dfc2; }
+        .alerte.error { background: #fdecea; border: 1px solid #f3b9b3; }
+        .badge { display: inline-block; padding: 0 .5rem; border-radius: 999px; background: var(--gris); border: 1px solid var(--bord); font-size: .85rem; }
+        .retard { color: #b3261e; font-weight: 600; }
+        .carte { border: 1px solid var(--bord); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .recherche { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .pagination { display: flex; gap: .75rem; align-items: center; }
+        .aide { color: #555; font-size: .9rem; background: var(--gris); padding: .75rem 1rem; border-radius: 6px; }
+        form.en-ligne { display: inline; }
+    </style>
+</head>
+<body>
+<nav>
+    <a class="marque" href="{{ path('app_catalogue') }}">📚 Médiathèques</a>
+    <a href="{{ path('app_catalogue') }}">Catalogue</a>
+    {% if is_granted('ROLE_ADHERENT') %}<a href="{{ path('app_espace') }}">Mon espace</a>{% endif %}
+    {% if is_granted('ROLE_BIBLIOTHECAIRE') %}
+        <a href="/admin">Administration</a>
+        <a href="{{ path('app_stats') }}">Statistiques</a>
+    {% endif %}
+    <span class="espace"></span>
+    {% if app.user %}
+        <span>{{ app.user.userIdentifier }}</span>
+        <a href="{{ path('app_logout') }}">Déconnexion</a>
+    {% else %}
+        <a href="{{ path('app_login') }}">Connexion</a>
+    {% endif %}
+</nav>
+<main>
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alerte {{ type }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+    {% block body %}{% endblock %}
+</main>
+</body>
 </html>

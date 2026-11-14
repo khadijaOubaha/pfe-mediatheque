@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catalogue{% endblock %}
+
+{% block body %}
+    <h1>Catalogue</h1>
+
+    <form class="recherche" method="get" action="{{ path('app_catalogue') }}">
+        <input type="search" name="q" value="{{ q }}" placeholder="Titre, auteur, ISBN, éditeur…" size="36">
+        <select name="type">
+            <option value="">Tous les types</option>
+            {% for t in types %}
+                <option value="{{ t.value }}" {{ type == t.value ? 'selected' : '' }}>{{ t.value }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Rechercher</button>
+    </form>
+
+    <p>{{ total }} œuvre(s) trouvée(s).</p>
+
+    <table>
+        <thead>
+            <tr><th>Titre</th><th>Type</th><th>Éditions</th></tr>
+        </thead>
+        <tbody>
+        {% for oeuvre in oeuvres %}
+            <tr>
+                <td><a href="{{ path('app_catalogue_show', {id: oeuvre.id}) }}">{{ oeuvre.titre }}</a></td>
+                <td><span class="badge">{{ oeuvre.type.value }}</span></td>
+                <td>{{ oeuvre.editions|length }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="3">Aucun résultat.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}<a href="{{ path('app_catalogue', {q: q, type: type, page: page - 1}) }}">← Précédent</a>{% endif %}
+            <span>Page {{ page }} / {{ pages }}</span>
+            {% if page < pages %}<a href="{{ path('app_catalogue', {q: q, type: type, page: page + 1}) }}">Suivant →</a>{% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

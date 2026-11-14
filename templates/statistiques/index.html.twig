@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques{% endblock %}
+
+{% block body %}
+    <h1>Statistiques</h1>
+
+    <h2>Taux de rotation (12 derniers mois)</h2>
+    <p>Nombre de prêts divisé par le nombre d'exemplaires en circulation.</p>
+    <table>
+        <thead><tr><th>Site</th><th>Prêts</th><th>Exemplaires</th><th>Taux</th></tr></thead>
+        <tbody>
+        {% for ligne in rotation.sites %}
+            <tr><td>{{ ligne.site }}</td><td>{{ ligne.prets }}</td><td>{{ ligne.exemplaires }}</td><td>{{ ligne.taux }}</td></tr>
+        {% endfor %}
+        <tr>
+            <th>Réseau</th><th>{{ rotation.global.prets }}</th><th>{{ rotation.global.exemplaires }}</th><th>{{ rotation.global.taux }}</th>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Documents les plus empruntés</h2>
+    <table>
+        <thead><tr><th>#</th><th>Titre</th><th>Prêts</th></tr></thead>
+        <tbody>
+        {% for ligne in plus_empruntes %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td><a href="{{ path('app_catalogue_show', {id: ligne.id}) }}">{{ ligne.titre }}</a></td>
+                <td>{{ ligne.nb }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="3">Aucun prêt enregistré.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Documents jamais empruntés ({{ nb_jamais_empruntes }})</h2>
+    <table>
+        <thead><tr><th>Titre</th></tr></thead>
+        <tbody>
+        {% for ligne in jamais_empruntes %}
+            <tr><td><a href="{{ path('app_catalogue_show', {id: ligne.id}) }}">{{ ligne.titre }}</a></td></tr>
+        {% else %}
+            <tr><td>Tous les documents ont été empruntés au moins une fois.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if nb_jamais_empruntes > jamais_empruntes|length %}
+        <p>Seuls les {{ jamais_empruntes|length }} premiers sont affichés.</p>
+    {% endif %}
+{% endblock %}

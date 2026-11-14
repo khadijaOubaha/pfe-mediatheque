@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon espace{% endblock %}
+
+{% block body %}
+    <h1>Mon espace</h1>
+    <p>Bonjour {{ adherent }}.</p>
+
+    <h2>Prêts en cours</h2>
+    <table>
+        <thead><tr><th>Exemplaire</th><th>Emprunté le</th><th>À rendre le</th><th>Prolongations</th><th></th></tr></thead>
+        <tbody>
+        {% for pret in prets_en_cours %}
+            <tr>
+                <td>{{ pret.exemplaire.edition }} <span class="badge">{{ pret.exemplaire.codeBarres }}</span></td>
+                <td>{{ pret.dateEmprunt|date('d/m/Y') }}</td>
+                <td class="{{ pret.dateEcheance < aujourdhui ? 'retard' : '' }}">
+                    {{ pret.dateEcheance|date('d/m/Y') }}{% if pret.dateEcheance < aujourdhui %} (en retard){% endif %}
+                </td>
+                <td>{{ pret.nbProlongations }}</td>
+                <td>
+                    <form class="en-ligne" method="post" action="{{ path('app_pret_prolonger', {id: pret.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('prolonger' ~ pret.id) }}">
+                        <button type="submit" class="secondaire">Prolonger</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5">Aucun prêt en cours.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Réservations</h2>
+    <table>
+        <thead><tr><th>Édition</th><th>Site de retrait</th><th>Demandée le</th><th>Statut</th><th></th></tr></thead>
+        <tbody>
+        {% for reservation in reservations_actives %}
+            <tr>
+                <td>{{ reservation.edition }}</td>
+                <td>{{ reservation.siteRetrait }}</td>
+                <td>{{ reservation.dateDemande|date('d/m/Y') }}</td>
+                <td>
+                    <span class="badge">{{ reservation.statut.value }}</span>
+                    {% if reservation.dateLimiteRetrait %}<br>À retirer avant le {{ reservation.dateLimiteRetrait|date('d/m/Y') }}{% endif %}
+                </td>
+                <td>
+                    <form class="en-ligne" method="post" action="{{ path('app_reservation_annuler', {id: reservation.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('annuler' ~ reservation.id) }}">
+                        <button type="submit" class="secondaire">Annuler</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5">Aucune réservation active.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Pénalités</h2>
+    <table>
+        <thead><tr><th>Date</th><th>Motif</th><th>Montant</th><th>Payée</th></tr></thead>
+        <tbody>
+        {% for penalite in penalites %}
+            <tr>
+                <td>{{ penalite.date|date('d/m/Y') }}</td>
+                <td>{{ penalite.motif.value }}</td>
+                <td>{{ penalite.montant }} DH</td>
+                <td>{{ penalite.payee ? 'Oui' : 'Non' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">Aucune pénalité.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Historique des prêts</h2>
+    <table>
+        <thead><tr><th>Document</th><th>Emprunté le</th><th>Rendu le</th></tr></thead>
+        <tbody>
+        {% for pret in historique %}
+            <tr>
+                <td>{{ pret.exemplaire.edition }}</td>
+                <td>{{ pret.dateEmprunt|date('d/m/Y') }}</td>
+                <td>{{ pret.dateRetour|date('d/m/Y') }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="3">Aucun prêt passé.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if reservations_passees|length > 0 %}
+        <h2>Réservations terminées</h2>
+        <table>
+            <thead><tr><th>Édition</th><th>Demandée le</th><th>Statut</th></tr></thead>
+            <tbody>
+            {% for reservation in reservations_passees %}
+                <tr>
+                    <td>{{ reservation.edition }}</td>
+                    <td>{{ reservation.dateDemande|date('d/m/Y') }}</td>
+                    <td>{{ reservation.statut.value }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
