@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import par ISBN{% endblock %}
+
+{% block body %}
+    <h1>Import par ISBN</h1>
+    <p>Saisissez un ISBN, ou plusieurs (un par ligne, ou séparés par des espaces ou des virgules, 50 au maximum).
+        Les fiches sont créées à partir d'Open Library ; une fiche déjà présente n'est jamais écrasée, seuls ses champs vides sont complétés.</p>
+
+    <form method="post" action="{{ path('app_import_isbn') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('import_isbn') }}">
+        <label for="isbns">ISBN</label>
+        <textarea id="isbns" name="isbns" rows="6" cols="50" placeholder="9782070612758">{{ saisie }}</textarea>
+        <p><button type="submit">Importer</button></p>
+    </form>
+
+    {% if resultats is not null %}
+        <h2>Résultat</h2>
+        <table>
+            <thead><tr><th>ISBN</th><th>Statut</th><th>Détail</th></tr></thead>
+            <tbody>
+            {% for r in resultats %}
+                <tr>
+                    <td>{{ r.isbn }}</td>
+                    <td><span class="badge">{{ r.statut.value }}</span></td>
+                    <td>
+                        {{ r.message }}
+                        {% if r.edition and r.edition.oeuvre %}
+                            <a href="{{ path('app_catalogue_show', {id: r.edition.oeuvre.id}) }}">Voir la fiche</a>
+                        {% endif %}
+                        {% for difference in r.differences %}
+                            <br><span class="retard">⚠ {{ difference }}</span>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

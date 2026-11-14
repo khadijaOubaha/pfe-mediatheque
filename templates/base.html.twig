@@ -18,6 +18,7 @@
         table { width: 100%; border-collapse: collapse; margin: .5rem 0 1.5rem; }
         th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--bord); vertical-align: top; }
         th { background: var(--gris); }
+        textarea { font: inherit; padding: .4rem .6rem; border: 1px solid var(--bord); border-radius: 6px; max-width: 100%; }
         input, select, button { font: inherit; padding: .4rem .6rem; border: 1px solid var(--bord); border-radius: 6px; }
         button { background: var(--bleu); color: #fff; border-color: var(--bleu); cursor: pointer; }
         button.secondaire { background: #fff; color: var(--bleu); }
@@ -43,6 +44,7 @@
     {% if is_granted('ROLE_BIBLIOTHECAIRE') %}
         <a href="/admin">Administration</a>
         <a href="{{ path('app_stats') }}">Statistiques</a>
+        <a href="{{ path('app_import_isbn') }}">Import ISBN</a>
     {% endif %}
     <span class="espace"></span>
     {% if app.user %}
