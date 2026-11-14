@@ -8,3 +8,18 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+Invoke-WebRequest : Impossible de trouver un paramŠtre positionnel acceptant l'argument ®ÿphpunit.pharÿ¯.
+Au caractŠre Ligne:1 : 1
++ Invoke-WebRequest https://phar.phpunit.de/phpunit-11.phar -OutFile ph ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument : (:) [Invoke-WebRequest], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.InvokeWebRequestCommand
+ 
+Invoke-WebRequest : Impossible de trouver un paramŠtre positionnel acceptant l'argument ®ÿphpunit.pharÿ¯.
+Au caractŠre Ligne:1 : 1
++ Invoke-WebRequest https://phar.phpunit.de/phpunit-11.phar -OutFile ph ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument : (:) [Invoke-WebRequest], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.InvokeWebRequestCommand
+ 
+phpunit.phar
