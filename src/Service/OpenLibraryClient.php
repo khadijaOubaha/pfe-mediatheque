@@ -67,7 +67,9 @@ class OpenLibraryClient implements FournisseurFicheIsbn
         usleep(200000);
 
         if (false === $reponse) {
-            throw new FournisseurIndisponibleException("Open Library est injoignable (réseau ou service indisponible).");
+            $detail = error_get_last()['message'] ?? 'erreur inconnue';
+
+            throw new FournisseurIndisponibleException(sprintf('Open Library est injoignable (%s).', $detail));
         }
 
         return $reponse;

@@ -42,6 +42,7 @@
     <a href="{{ path('app_catalogue') }}">Catalogue</a>
     {% if is_granted('ROLE_ADHERENT') %}<a href="{{ path('app_espace') }}">Mon espace</a>{% endif %}
     {% if is_granted('ROLE_BIBLIOTHECAIRE') %}
+        <a href="{{ path('app_comptoir') }}">Comptoir</a>
         <a href="/admin">Administration</a>
         <a href="{{ path('app_stats') }}">Statistiques</a>
         <a href="{{ path('app_import_isbn') }}">Import ISBN</a>

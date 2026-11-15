@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Comptoir{% endblock %}
+
+{% block body %}
+    <h1>Comptoir</h1>
+    <p>Enregistrement des prêts et des retours, avec contrôle de toutes les règles métier.</p>
+
+    <div class="carte">
+        <h2>Emprunter</h2>
+        <form method="post" action="{{ path('app_comptoir_emprunter') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('comptoir') }}">
+            <label>Email de l'adhérent
+                <input type="email" name="email" required placeholder="ahmed.benali1@example.com">
+            </label>
+            <label>Code-barres de l'exemplaire
+                <input type="text" name="code_barres" required placeholder="MED-00001">
+            </label>
+            <button type="submit">Enregistrer le prêt</button>
+        </form>
+    </div>
+
+    <div class="carte">
+        <h2>Retourner</h2>
+        <form method="post" action="{{ path('app_comptoir_retourner') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('comptoir') }}">
+            <label>Code-barres de l'exemplaire
+                <input type="text" name="code_barres" required placeholder="MED-00001">
+            </label>
+            <label>Site où il est rendu
+                <select name="site">
+                    {% for site in sites %}<option value="{{ site.id }}">{{ site.nom }}</option>{% endfor %}
+                </select>
+            </label>
+            <label><input type="checkbox" name="abime" value="1" style="display:inline;width:auto"> Rendu abîmé (retiré de la circulation, pénalité forfaitaire)</label>
+            <button type="submit">Enregistrer le retour</button>
+        </form>
+    </div>
+
+    <div class="carte">
+        <h2>Réservations échues</h2>
+        <p>Les réservations dont la date limite de retrait est dépassée expirent, et l'exemplaire est proposé au suivant.</p>
+        <form method="post" action="{{ path('app_comptoir_expirer') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('comptoir') }}">
+            <button type="submit" class="secondaire">Expirer les réservations échues</button>
+        </form>
+    </div>
+
+    <h2>Prêts en cours (les plus anciens échéances)</h2>
+    <table>
+        <thead><tr><th>Exemplaire</th><th>Adhérent</th><th>Échéance</th></tr></thead>
+        <tbody>
+        {% for pret in prets_ouverts %}
+            <tr>
+                <td>{{ pret.exemplaire.codeBarres }} — {{ pret.exemplaire.edition }}</td>
+                <td>{{ pret.adherent }} <small>({{ pret.adherent.email }})</small></td>
+                <td class="{{ pret.dateEcheance < aujourdhui ? 'retard' : '' }}">
+                    {{ pret.dateEcheance|date('d/m/Y') }}{% if pret.dateEcheance < aujourdhui %} (en retard){% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="3">Aucun prêt en cours.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

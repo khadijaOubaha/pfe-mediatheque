@@ -43,3 +43,50 @@ Par l'entité `Contribution` (édition + personne + rôle `AUTEUR`, `TRADUCTEUR`
 - Toutes les valeurs configurables (max de prêts, durée, tarif par jour, prolongations) sont dans `Formule`. Les seules constantes en code sont les 5 jours de mise de côté et les forfaits perdu (50 DH) et abîmé (20 DH).
 - Le statut d'un prêt n'est pas stocké : en cours = `dateRetour` nulle, en retard = échéance dépassée.
 - Les règles R1 à R9 seront couvertes par des tests : au moins un cas qui passe et un cas refusé pour chacune.
+
+---
+
+## 2026-11-13 — Environnement et tests
+
+- **PHPUnit** est lancé via le fichier `phpunit.phar` sur le poste de développement : l'installation par Composer échouait sous Windows (extraction de fichiers verrouillée par l'antivirus). Dans Docker, PHPUnit s'installe normalement par Composer.
+- Les tests de règles métier sont des **tests d'intégration** sur une base MySQL dédiée (`mediatheque_test`) : chaque test s'exécute dans une transaction annulée à la fin, donc la base reste propre.
+- Les dates de référence des tests sont **fixes** pour que les résultats soient reproductibles.
+- Une exception métier (`RegleMetierException`) est levée à chaque règle violée ; les tests vérifient le refus et, pour les cas réussis, l'état des entités.
+
+## 2026-11-14 — Docker
+
+- Image PHP 8.2 en ligne de commande avec le serveur intégré de PHP, en mode développement : suffisant pour la démonstration demandée, documenté comme tel dans `INSTALL.md`.
+- Le Dockerfile conserve un **cache Composer** et **retente** l'installation des dépendances : le réseau utilisé pendant le développement était instable.
+- Au démarrage, le conteneur applique les migrations puis charge les données de démonstration **seulement si les comptes de démonstration sont absents**, pour ne pas écraser des données au redémarrage.
+- Une base `mediatheque_test` est créée automatiquement au premier démarrage de MySQL.
+
+## 2026-11-14 — Comptes, rôles et sécurité
+
+- Trois rôles : `ROLE_ADHERENT`, `ROLE_BIBLIOTHECAIRE` et `ROLE_ADMIN` (qui hérite du précédent).
+- **User** est distinct d'**Adherent** : un compte peut exister sans fiche adhérent (bibliothécaire, administrateur), et seule une fiche liée donne accès à l'espace adhérent.
+- `/admin`, `/comptoir`, `/statistiques` et `/import-isbn` sont réservés au bibliothécaire ; `/mon-espace` aux adhérents.
+- Mots de passe hachés, formulaires protégés par jeton CSRF ; un adhérent ne peut agir que sur **ses** prêts et **ses** réservations.
+- Les comptes de démonstration sont créés par les fixtures et rappelés sur la page de connexion (valeurs de développement).
+
+## 2026-11-14 — Statistiques
+
+- **Taux de rotation** = nombre de prêts des 12 derniers mois ÷ nombre d'exemplaires en circulation (hors perdus et retirés), pour le réseau et par site (site d'emprunt pour les prêts, site actuel pour les exemplaires).
+- « Jamais empruntés » est calculé au niveau de l'**œuvre** : une œuvre n'est jamais empruntée si aucun exemplaire d'aucune de ses éditions n'a été prêté.
+
+## 2026-11-14 — Import Open Library
+
+Mise en œuvre de la réponse à la question 5 :
+
+- L'ISBN saisi est **validé** (clé de contrôle) et ramené en ISBN-13 ; un ISBN-10 est converti.
+- Une fiche inconnue est créée ; si une œuvre de même titre existe déjà, la nouvelle édition lui est **rattachée** (décision n°1).
+- Une fiche existante n'est **jamais écrasée** : seuls ses champs vides sont complétés, et les écarts (éditeur, année, pages, titre) sont signalés.
+- Un ISBN invalide, inconnu ou une API injoignable **n'interrompt pas un lot** : la ligne est marquée en échec.
+- La langue d'une fiche créée est `fr` par défaut, car l'API ne la fournit pas ; le nom d'un auteur est découpé en prénom et nom en gardant les particules (« de », « van »…) dans le nom.
+- L'appel réseau est isolé derrière une interface, ce qui permet de tester l'import sans accès à Internet. Un lot est limité à 50 ISBN et chaque appel est suivi d'une courte pause, par courtoisie envers l'API publique.
+
+## Limites connues
+
+- Les **écrans d'écriture du back-office EasyAdmin** (créer ou modifier un prêt, une réservation) écrivent directement dans la base et **ne passent pas** par les services métier : seuls le comptoir et l'espace adhérent appliquent toutes les règles. Le back-office sert à la consultation et à la correction, pas à la circulation des documents.
+- Il n'y a pas d'écran de **création de comptes** : les comptes de démonstration sont créés par les fixtures.
+- L'expiration des réservations échues est déclenchée **à la main** depuis le comptoir (ou par `ReservationService::expirerEchues`) ; il n'y a pas de tâche planifiée.
+- Pas de paiement des pénalités dans l'interface : le champ « payée » se modifie depuis le back-office.
